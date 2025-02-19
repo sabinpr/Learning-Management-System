@@ -1,0 +1,45 @@
+# LMS - Enhanced Learning Management System
+
+    # Course
+        -title = CharField
+        -description = TextField
+        -instructor = ForeignKey(User,'role':'instructor')
+        -difficulty = Charfield(choices-[begineer,intermediate,advanced])
+        -created_at = DateTimeField
+
+    # Enrollment
+        -student = ForeignKey(User,'role':'student')
+        -course = ForeignKey(Course)
+        -enrolled_at = DateTimeField
+        -progress = FloatField //Percentage Completion
+
+    # Assessment
+        -course = ForeignKey(Course)
+        -title = CharField
+        -description = TextField
+        -due_dete = DateTimeField
+
+    # Submission
+        -student = ForeignKey(User,'role':'student')
+        -assesment = Foreignkey(Assessment)
+        -submitted_at = DateTimeField
+        -score = FloatField
+
+    # Sponsorship
+        -sponsor = ForeignKey(User,'role':'sponsor')
+        -student = Foreignkey(User, 'role':'student')
+        -amount = DecimalFeild
+        -funded_at = DateTimeField
+    
+    # Notification
+        -user = ForeignKey(User)
+        -message = TextField
+        -is_read = BooleanField
+        -created_at = DateTimefield
+
+    # Payment
+        -sponsor = ForeignKey(User,'role':'sponsor')
+        -amount = DecimalField
+        -transaction_id = CharField
+        -status = Charfield(choices['pending','completed'])
+        -created_at = DateTimeField
