@@ -19,7 +19,8 @@ load_dotenv()
 
 
 def index(request):
-    return HttpResponse("Hello, world! This is the homepage.")
+    return HttpResponse("""<h1>Learning Management System, API</h1><br><h2>Welcome to My API</h2><br><h2>API Urls</h2><br><h3>Admin Pannel - /admin/<br>Documentation - /docs/<br>APIs - /api/<br>LogIn - /login/<br>Register - /register/<br>Admin Dashboard - /admin_dashboard/<br>Sponsor Dashboard - /sponsor_dashboard/</h3><br><br><br><br><br><br><br><h6>Note:Token Authorization is required (a9f152e09a3d58e742f135f90979ea1cedfffa19
+)""")
 
 
 # Course viewset
