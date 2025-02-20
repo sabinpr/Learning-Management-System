@@ -61,7 +61,7 @@ class Enrollment(models.Model):
     progress = models.FloatField(default=0.0)
 
     def __str__(self):
-        return f"{self.student.email} - {self.course.title}"
+        return f"{self.student.username} - {self.course.title}"
 
 
 # Add assessment for students
@@ -86,7 +86,7 @@ class Submission(models.Model):
     score = models.FloatField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.student.email} - {self.assessment.title}"
+        return f"{self.student.username} - {self.assessment.title}"
 
 
 # Sponsorship for student
@@ -99,7 +99,7 @@ class Sponsorship(models.Model):
     funded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.sponsor.email} sponsored {self.student.email}"
+        return f"{self.sponsor.username} sponsored {self.student.username}"
 
 
 # Sends Notification to the user
