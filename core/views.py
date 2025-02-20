@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from rest_framework import viewsets
 from .models import User, Course, Enrollment, Assessment, Submission, Sponsorship, Notification, Payment
 from .serializers import UserSerializer, CourseSerializer, EnrollmentSerializer, AssessmentSerializer, SubmissionSerializer, SponsorshipSerializer, NotificationSerializer, PaymentSerializer
@@ -15,6 +16,10 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
+
+
+def index(request):
+    return HttpResponse("Hello, world! This is the homepage.")
 
 
 # Course viewset

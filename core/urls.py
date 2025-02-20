@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import CourseViewSet, PaymentViewSet, AssessmentViewSet, EnrollmentViewSet, SubmissionViewSet, SponsorshipViewSet, NotificationViewSet, register_api_view, login_api_view, sponsor_dashboard_api_view, admin_dashboard_api_view
+from .views import CourseViewSet, PaymentViewSet, AssessmentViewSet, EnrollmentViewSet, SubmissionViewSet, SponsorshipViewSet, NotificationViewSet, register_api_view, login_api_view, sponsor_dashboard_api_view, admin_dashboard_api_view, index
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
@@ -26,6 +26,7 @@ router.register('sponsorship', SponsorshipViewSet)
 router.register('notification', NotificationViewSet)
 
 urlpatterns = [
+    path('', index, name='index'),
     path('api/', include(router.urls)),
     path('register/', register_api_view, name='register'),
     path('login/', login_api_view, name='login'),
