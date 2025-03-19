@@ -51,7 +51,17 @@ class Course(models.Model):
         return self.title
 
 
+class Videos(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True)
+    title = models.CharField(max_length=255)
+    video_file = models.FileField(upload_to="videos/")
+
+    def __str__(self):
+        return f"{self.title} - {self.course.title}"
+
 # Enrollment of Students in new course
+
+
 class Enrollment(models.Model):
     student = models.ForeignKey(
         User, on_delete=models.CASCADE, limit_choices_to={'role': 'student'})

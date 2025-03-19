@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from rest_framework import viewsets
-from .models import User, Course, Enrollment, Assessment, Submission, Sponsorship, Notification, Payment
-from .serializers import UserSerializer, CourseSerializer, EnrollmentSerializer, AssessmentSerializer, SubmissionSerializer, SponsorshipSerializer, NotificationSerializer, PaymentSerializer
+from .models import User, Course, Enrollment, Assessment, Submission, Sponsorship, Notification, Payment, Videos
+from .serializers import UserSerializer, CourseSerializer, EnrollmentSerializer, AssessmentSerializer, SubmissionSerializer, SponsorshipSerializer, NotificationSerializer, PaymentSerializer, VideoSerializer
 from rest_framework import status, permissions
 from rest_framework.response import Response
 from django.contrib.auth.hashers import make_password
@@ -9,8 +9,10 @@ from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
-from .permissions import IsAdmin, IsSponsor
+from .permissions import IsAdmin, IsSponsor, IsInstructorOfCourse, CustomModelPermissions
 from django.db import models
+from .utils import create_notification
+from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from dotenv import load_dotenv
 import os
@@ -29,6 +31,25 @@ class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
 
     search_fields = ['title', 'difficulty', 'instructor__username']
+
+
+class VideoViewset(viewsets.ModelViewSet):
+    queryset = Videos.objects.all()
+    serializer_class = VideoSerializer
+
+    def get_permissions(self):
+        if self.action in ["create", "update", "partial_update", "destroy"]:
+            return [IsInstructorOfCourse()]
+        return [CustomModelPermissions()]
+
+    def perform_create(self, serializer):
+        course_id = self.request.data.get("course")
+        course = get_object_or_404(Course, id=course_id)
+
+        # Ensure only instructorcan add videos
+        if course.instructor != self.request.user:
+            return Response({"error": "You are not the instructor of this course"}, status=status.HTTP_403_FORBIDDEN)
+        serializer.save(course=course)
 
 
 # Enrollment viewset
@@ -59,6 +80,11 @@ class AssessmentViewSet(viewsets.ModelViewSet):
             # Step 3: Get a list of students by their IDs
             students = User.objects.filter(
                 id__in=enrollments.values_list('student_id', flat=True))
+
+            for student in students:
+                # Create a notification for each student
+                create_notification(
+                    student, f'New Assessment: {assessment_obj.title} - {assessment_obj.description}')
 
             # Step 4: Create a list of student email addresses
             student_email = [
@@ -109,11 +135,16 @@ class SponsorshipViewSet(viewsets.ModelViewSet):
 
             sponsor_email = [sponsorship_obj.sponsor.email]
 
+            sponsor = [sponsorship_obj.sponsor.id]
+
             # Step 5: Prepare the email content
             # Email address from your environment settings
             from_email = os.getenv('EMAIL_HOST_USER')
             subject = f'Sponsorship for : {sponsorship_obj.student.email}'
             message = f'''Thank you for sponsoring {sponsorship_obj.amount}. Funded at {sponsorship_obj.funded_at}'''
+
+            create_notification(
+                sponsor, f'New Sponsorship: {sponsorship_obj.amount} - {sponsorship_obj.student.email}')
 
             # Step 6: Send the email to all enrolled students
             try:
@@ -138,6 +169,13 @@ class SponsorshipViewSet(viewsets.ModelViewSet):
 class NotificationViewSet(viewsets.ModelViewSet):
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
+
+
+    def update(self, request, *args, **kwargs):
+        notification = self.get_object()
+        notification.is_read = True
+        notification.save()
+        return Response({'status': 'Notification marked as read'}, status=204)
 
 
 # Payment viewset

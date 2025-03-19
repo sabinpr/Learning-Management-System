@@ -1,5 +1,6 @@
 from rest_framework.permissions import BasePermission
 from rest_framework.permissions import DjangoModelPermissions
+from .models import Course, Videos
 
 
 class CustomModelPermissions(DjangoModelPermissions):
@@ -32,3 +33,13 @@ class IsStudent(BasePermission):
 class IsSponsor(BasePermission):
     def has_permission(self, request, view):
         return request.user.groups.filter(name='sponsor').exists()
+
+
+class IsInstructorOfCourse(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated
+
+    def has_object_permission(self, request, view, obj):
+        if isinstance(obj, Videos):
+            return obj.course.instructor == request.user
+        return False

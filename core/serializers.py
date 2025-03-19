@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Course, Enrollment, Assessment, Submission, Sponsorship, Notification, Payment
+from .models import User, Course, Enrollment, Assessment, Submission, Sponsorship, Notification, Payment, Videos
 
 
 # User serializer
@@ -9,16 +9,26 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'password', 'role']
 
 
+# Videos serializer
+class VideoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Videos
+        fields = '__all__'
+
 # Course serializer
+
+
 class CourseSerializer(serializers.ModelSerializer):
     instructor = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.filter(role='instructor'), write_only=True)
     instructor_email = serializers.CharField(
         source='instructor.email', read_only=True)
+    videos = VideoSerializer(many=True, read_only=True)
 
     class Meta:
         model = Course
-        fields = '__all__'
+        fields = ["id", "title", "description",
+                  "instructor", "difficulty", "created_at", "videos", "instructor_email"]
 
 
 # Enrollment serializer
